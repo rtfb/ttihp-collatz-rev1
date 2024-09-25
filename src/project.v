@@ -172,4 +172,7 @@ module tt_um_rtfb_collatz (
     assign write_enable = uio_in[7];
     assign addr = uio_in[ADDR_IDX:0];
     assign read_path_record = uio_in[ADDR_IDX+1];
+
+    // List all unused inputs to prevent warnings
+    wire _unused = &{ena, 1'b0};
 endmodule
