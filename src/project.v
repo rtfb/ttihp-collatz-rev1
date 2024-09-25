@@ -30,19 +30,19 @@ parameter STATE_COMPUTE = 1;
 
 // size of the Collatz orbit iterator
 parameter BITS = 144;
-parameter BITS_IDX = BITS - 1;
+parameter BITS_IDX = 143;
 
 // size of a register for holding orbit length
 parameter OLEN_BITS = 16;
-parameter OLEN_BITS_IDX = OLEN_BITS - 1;
+parameter OLEN_BITS_IDX = 15;
 
 // size of a register for holding the upper bits of path record
 parameter PLEN_BITS = 16;
-parameter PLEN_BITS_IDX = OLEN_BITS - 1;
+parameter PLEN_BITS_IDX = 15;
 
 // width of the address bits
 parameter ADDR_BITS = 5;
-parameter ADDR_IDX = ADDR_BITS - 1;
+parameter ADDR_IDX = 4;
 
 module collatz (
     input  state,
