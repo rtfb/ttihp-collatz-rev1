@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: © 2024 Tiny Tapeout
 # SPDX-License-Identifier: Apache-2.0
 
+import inspect
+
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, FallingEdge, Timer, ClockCycles
@@ -14,9 +16,54 @@ DONE_COMPUTING_BIT = 1 << 7
 WRITE_ENABLE_BIT = 1 << 7
 
 
+async def computing_bit_high(dut):
+    '''computing_bit_high spins a loop while uio_out's DONE_COMPUTING_BIT is
+    high. If it's held high for too long, it fails the test.'''
+    counter = 1
+    while int(dut.uio_out.value) == DONE_COMPUTING_BIT:
+        counter += 1
+        await Timer(1, units="ms")
+        if counter > 100:
+            assert False, 'compute_busy is on for too long'
+    await Timer(10, units="ms")
+
+
+@cocotb.test()
+async def test_continuous(dut):
+    dut._log.info(f'start: {_caller_name()}')
+    clock = Clock(dut.clk, 10, units="us")
+    cocotb.start_soon(clock.start())
+
+    # reset
+    dut._log.info("reset")
+    dut.rst_n.value = 0
+    await Timer(10, units="ms")
+    dut.uio_in.value = 0
+    dut.rst_n.value = 1
+    await Timer(10, units="ms")
+
+    tests = [
+        (12, 9, 16),
+        # (57, 32, 196),
+    ]
+    for t in tests:
+        input, want_orbit, want_record = t
+
+        # set input
+        await set_input(dut, input)
+        await start_computing(dut)
+        await computing_bit_high(dut)
+
+        # read output and assert
+        orbit_len, path_record_h16 = await read_output(dut)
+        assert orbit_len == want_orbit
+        want_record_h16 = extract_upper_bits(want_record, 16)
+        assert path_record_h16 == want_record_h16, f'for len {orbit_len}'
+
+
 @cocotb.test()
 async def test_collatz(dut):
-    dut._log.info("start")
+    dut._log.info(f'start: {_caller_name()}')
     clock = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clock.start())
 
@@ -234,3 +281,8 @@ async def read_output(dut):
     orbit_len = await read_n_byte_num(dut, 2)
     path_rec = await read_n_byte_num(dut, 2, READ_PATH_RECORD_BIT)
     return orbit_len, path_rec
+
+
+def _caller_name():
+    ''' _caller_name returns the name of the function that called it.'''
+    return inspect.stack()[1][3]

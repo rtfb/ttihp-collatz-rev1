@@ -65,7 +65,7 @@ module collatz (
     //
     // The check for orbit_len maxing out is a safeguard against a dead loop
     // due to potential unknown bugs.
-    assign busy = iter != 2 && orbit_len != 16'hffff;
+    assign busy = comp && iter != 2 && orbit_len != 16'hffff;
 
     wire [PLEN_BITS_IDX:0] next_iter_h16;
     assign next_iter_h16 = next_iter[BITS_IDX -: OLEN_BITS];
