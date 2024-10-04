@@ -44,7 +44,7 @@ async def test_continuous(dut):
 
     tests = [
         (12, 9, 16),
-        # (57, 32, 196),
+        (57, 32, 196),
     ]
     for t in tests:
         input, want_orbit, want_record = t

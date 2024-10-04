@@ -125,6 +125,7 @@ module tt_um_rtfb_collatz (
             if (switch_to_compute) begin
                 ioctl <= IOCTL_COMPUTE;
                 state <= STATE_COMPUTE;
+                orbit_len <= 0;
                 path_record_h16 <= iter[BITS_IDX -: OLEN_BITS];
             end
             if (switch_to_io) begin
