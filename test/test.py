@@ -61,6 +61,49 @@ async def test_continuous(dut):
         assert path_record_h16 == want_record_h16, f'for len {orbit_len}'
 
 
+async def set_input_skip_zeros(dut, input):
+    for i in range(BYTES):
+        data_byte = extract_ith_byte(input, i)
+        if data_byte == 0:
+            continue
+        dut.uio_in.value = i         # set address of i'th byte
+        dut.ui_in.value = data_byte  # set the data byte
+        await ClockCycles(dut.clk, 1)
+        await pulse_write_enable(dut)
+
+
+@cocotb.test()
+async def test_skip_zero_input_bytes(dut):
+    dut._log.info(f'start: {_caller_name()}')
+    clock = Clock(dut.clk, 10, units="us")
+    cocotb.start_soon(clock.start())
+    tests = [
+        (8, 3, 8),
+        (57, 32, 196),
+        (87228625, 311, 261685876),
+    ]
+    for t in tests:
+        input, want_orbit, want_record = t
+
+        # reset
+        dut.rst_n.value = 0
+        await ClockCycles(dut.clk, 2)
+        dut.uio_in.value = 0
+        dut.rst_n.value = 1
+        await ClockCycles(dut.clk, 2)
+
+        # set input
+        await set_input_skip_zeros(dut, input)
+        await start_computing(dut)
+        await done_computing(dut)
+
+        # read output and assert
+        orbit_len, path_record_h16 = await read_output(dut)
+        assert orbit_len == want_orbit
+        want_record_h16 = extract_upper_bits(want_record, 16)
+        assert path_record_h16 == want_record_h16, f'for len {orbit_len}'
+
+
 @cocotb.test()
 async def test_collatz(dut):
     dut._log.info(f'start: {_caller_name()}')
@@ -213,7 +256,6 @@ async def test_collatz(dut):
         input, want_orbit, want_record = t
 
         # reset
-        dut._log.info("reset")
         dut.rst_n.value = 0
         await ClockCycles(dut.clk, 2)
         dut.uio_in.value = 0

@@ -121,6 +121,7 @@ module tt_um_rtfb_collatz (
             data_out <= 0;
             orbit_len <= 0;
             path_record_h16 <= 0;
+            iter <= 0;
         end else begin
             if (switch_to_compute) begin
                 ioctl <= IOCTL_COMPUTE;
@@ -131,6 +132,7 @@ module tt_um_rtfb_collatz (
             if (switch_to_io) begin
                 ioctl <= IOCTL_IO;
                 state <= STATE_IO;
+                iter <= 0;
             end
             case (state)
                 STATE_IO: begin
