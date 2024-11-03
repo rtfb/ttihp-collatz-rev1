@@ -1,5 +1,19 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
+# Collatz conjecture brute-forcer, revision 1
+
+This is a revised tapeout of [tt05-collatz][6]. It contains a few design fixes
+discovered while testing the original:
+
+* Fix for `compute_busy` pin: keep the pin firmly pulled down after computations
+  are done.
+* Reset `orbit_len` register when starting computations on a new input. This
+  allows feeding the ASIC a new input without cycling through reset.
+* Reset iterator register: similarly to `orbit_len`, reset the iterator register
+  as well. This does not affect functionality when all the bytes of input are
+  transmitted (including the zero bytes), but from the software perspective,
+  it's more intuitive to skip the zero bytes, and it's easy to accommodate that.
+
 # Collatz conjecture brute-forcer
 
 A hardware implementation of a brute-force checker for [Collatz conjecture][1].
@@ -74,6 +88,7 @@ To learn more and get started, visit https://tinytapeout.com.
 
 [1]: https://en.wikipedia.org/wiki/Collatz_conjecture
 [2]: http://www.ericr.nl/wondrous/pathrecs.html
-[3]: https://github.com/rtfb/tt05-collatz/blob/main/src/test.py#L191
-[4]: https://github.com/rtfb/tt05-collatz/blob/main/src/test.py#L206
-[5]: https://github.com/rtfb/tt05-collatz/blob/main/src/test.py#L212
+[3]: https://github.com/rtfb/tt09-collatz-rev1/blob/main/test/test.py#L291
+[4]: https://github.com/rtfb/tt09-collatz-rev1/blob/main/test/test.py#L306
+[5]: https://github.com/rtfb/tt09-collatz-rev1/blob/main/test/test.py#L312
+[6]: https://github.com/rtfb/tt05-collatz
